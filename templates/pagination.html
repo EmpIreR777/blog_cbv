@@ -1,0 +1,13 @@
+{% if is_paginated %}
+    <div class="pagination p-3">
+    {% for page_number in page_obj.paginator.get_elided_page_range %}
+        {% if page_number == page_obj.paginator.ELLIPSIS %}
+            {{page_number}}
+        {% else %}
+            <a href="?page={{ page_number }}" class="page-link">
+                {{page_number}}
+            </a>
+        {% endif %}
+    {% endfor %}
+    </div>
+{%endif%}
