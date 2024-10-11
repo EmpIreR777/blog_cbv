@@ -11,9 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-4hbhrx@)uz$&ddw#i6#0_!!6+7nb4)m2+c7lnqifsfao-68m+3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -26,10 +26,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.blog.apps.BlogConfig',
+    'taggit',
     'mptt',
     'django_mptt_admin',
-    'debug_toolbar',
+    # 'debug_toolbar',
     'apps.accounts',
+    'django_recaptcha',
+    'ckeditor_uploader',
+    'ckeditor',
 ]
 
 
@@ -49,7 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',  # Middleware тулбара
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',  # Middleware тулбара
+    'apps.accounts.middleware.ActiveUserMiddleware',
 ]
 
 ROOT_URLCONF = 'blog_cbv.urls'
@@ -122,6 +127,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOM = BASE_DIR / 'static'
+STATICFILES_DIRS = [BASE_DIR / 'templates/js/']
+
+STATIC_ROOT = BASE_DIR / 'static/'
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    'awesome_ckeditor': {
+        'toolbar': 'full',
+        'height': 300,
+    },
+}
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -130,3 +146,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+RECAPTCHA_PUBLIC_KEY = '6LdivFMqAAAAAOO1rycPrJaMGjkeAQzfqz7kg3FU'
+RECAPTCHA_PRIVATE_KEY = '6LdivFMqAAAAAN3FO3s7L-CryNwiCjpn-zi35f2j'
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': (BASE_DIR / 'cache'),
+    }
+}

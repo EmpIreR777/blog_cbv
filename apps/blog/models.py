@@ -2,6 +2,10 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.contrib.auth.models import User
 
+from taggit.managers import TaggableManager
+
+from ckeditor.fields import RichTextField
+
 from django.urls import reverse
 from mptt.models import MPTTModel, TreeForeignKey
 from apps.services.utils import unique_slugify
@@ -20,6 +24,64 @@ class PostManager(models.Manager):
             'author', 'category').filter(status='published')
 
 
+class Rating(models.Model):
+    post = models.ForeignKey(to='Post', verbose_name='Запись',
+                             on_delete=models.CASCADE,
+                             related_name='ratings')
+    user = models.ForeignKey(to=User, verbose_name='Пользователь',
+                             on_delete=models.CASCADE, blank=True, null=True)
+    value = models.IntegerField(verbose_name='Значение', choices=[
+        (1, 'Нравиться'), (-1, 'Не нравиться')])
+    time_create = models.DateTimeField(verbose_name='Время добавление',
+                                       auto_now_add=True)
+    ip_address = models.GenericIPAddressField(verbose_name='IP Адрес')
+
+    class Meta:
+        unique_together = ('post', 'ip_address')
+        ordering = ('-time_create',)
+        indexes = [models.Index(fields=['-time_create', 'value'])]
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинги'
+
+    def __str__(self):
+        return self.post.title
+
+
+class Comment(MPTTModel):
+    STATUS_OPTIONS = (
+        ('published', 'Опубликовано'),
+        ('draft', 'Черновик')
+    )
+
+    post = models.ForeignKey('Post', on_delete=models.CASCADE,
+                             verbose_name='Запись',
+                             related_name='comments')
+    author = models.ForeignKey(User, verbose_name='Автор комментария',
+                               on_delete=models.CASCADE,
+                               related_name='comments_author')
+    content = models.TextField(verbose_name='Текст комментария', max_length=3000)
+    time_create = models.DateTimeField(verbose_name='Время добавления',
+                                       auto_now_add=True)
+    time_update = models.DateTimeField(verbose_name='Время обновления',
+                                       auto_now=True)
+    status = models.CharField(choices=STATUS_OPTIONS, default='published',
+                              verbose_name='Статус постов', max_length=10)
+    parent = TreeForeignKey('self', verbose_name='Родительский комментарий',
+                            null=True, blank=True, related_name='children',
+                            on_delete=models.CASCADE)
+
+    class MTTMeta:
+        order_insertion_by = ('-time_create')
+
+    class Meta:
+        ordering = ['-time_create']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return f'{self.author}:{self.content}'
+
+
 class Post(models.Model):
     """
     Модель постов для нашего блога
@@ -29,8 +91,8 @@ class Post(models.Model):
 
     title = models.CharField(verbose_name='Название записи', max_length=255)
     slug = models.SlugField(verbose_name='URL', max_length=255, blank=True)
-    description = models.TextField(verbose_name='Краткое описание', max_length=500)
-    text = models.TextField(verbose_name='Полный текст записи')
+    description = RichTextField(config_name='awesome_ckeditor', verbose_name='Краткое описание', max_length=500)
+    text = RichTextField(config_name='awesome_ckeditor', verbose_name='Полный текст записи')
     category = TreeForeignKey('Category', on_delete=models.PROTECT, related_name='posts', verbose_name='Категория')
     thumbnail = models.ImageField(
         default='default.jpg',
@@ -55,6 +117,7 @@ class Post(models.Model):
     fixed = models.BooleanField(verbose_name='Прикреплено', default=False)
     objects = models.Manager()
     custom = PostManager()
+    tags = TaggableManager()
 
     class Meta:
         db_table = 'blog_post'
@@ -71,6 +134,9 @@ class Post(models.Model):
         Получаем прямую ссылку на статью
         """
         return reverse('post_detail', kwargs={'slug': self.slug})
+
+    def get_sum_rating(self):
+        return sum([rating.value for rating in self.ratings.all()])
 
     def save(self, *args, **kwargs):
         """

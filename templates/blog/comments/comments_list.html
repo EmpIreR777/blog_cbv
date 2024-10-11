@@ -1,0 +1,50 @@
+{% load mptt_tags static %}
+<div class="nested-comments">
+{% recursetree post.comments.all %}
+<ul id="comment-thread-{{ node.pk }}">
+    <li class="card border-0">
+        <div class="row">
+            <div class="col-md-2">
+                <img src="{{ node.author.profile.avatar.url }}" style="width: 100px;height: 100px;object-fit: cover;" alt="{{ node.author }}"/>
+            </div>
+            <div class="col-md-10">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <a href="{{ node.author.profile.get_absolute_url }}">{{ node.author }}</a>
+                    </h6>
+                    <p class="card-text">
+                        {{ node.content }}
+                    </p>
+                    <a class="btn btn-sm btn-dark btn-reply" href="#commentForm" data-comment-id="{{ node.pk }}" data-comment-username="{{ node.author }}">Ответить</a>
+                    <hr/>
+                    <time>{{ node.time_create }}</time>
+                </div>
+            </div>
+        </div>
+    </li>
+     {% if not node.is_leaf_node %}
+        {{ children }}
+     {% endif %}
+</ul>
+{% endrecursetree %}
+</div>
+
+{% if request.user.is_authenticated %}
+    <div class="card border-0">
+       <div class="card-body">
+          <h6 class="card-title">
+             Форма добавления комментария
+          </h6>
+          <form method="post" id="commentForm" name="commentForm" data-post-id="{{ post.pk }}">
+             {{ form }}
+             <div class="d-grid gap-2 d-md-block mt-2">
+                <button type="submit" class="btn btn-dark" id="commentSubmit">Добавить комментарий</button>
+             </div>
+          </form>
+       </div>
+    </div>
+{% endif %}
+
+{% block script %}
+<script src="{% static '/comments.js' %}"></script>
+{% endblock %}

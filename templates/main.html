@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -14,6 +15,7 @@
 <div class="container">
     <div class="row">
         <div class="col-lg-8 p-4">
+        {% include 'includes/messages.html' %}
             {% block content %}
             {% endblock %}
             {% include 'pagination.html' %}
@@ -24,5 +26,7 @@
     </div>
 </div>
 {% include 'footer.html' %}
+<script src="{% static 'backend.js' %}"></script>
+{% block script %}{% endblock %}
 </body>
 </html>

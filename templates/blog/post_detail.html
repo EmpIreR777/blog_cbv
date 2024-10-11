@@ -1,11 +1,41 @@
 {% extends 'main.html' %}
-
+{% load mptt_tags %}
+{% load static %}
 {% block content %}
-        <img src={{ post.thumbnail.url }} alt={{ post.title }} width="250"/>
-        <strong>{{ post.title }}</strong>
-        <p>{{ post.description }}</p>
-        <p>{{ post.text }}</p>
-        <small>{{ post.create }}</small>
-        <hr>
-        <span>{{ post.category.title }}</span>
+<div class="card mb-3">
+	<div class="row">
+		<div class="col-4">
+			<img src="{{ post.thumbnail.url }}" class="card-img-top" alt="{{ post.title }}" />
+		</div>
+		<div class="col-8">
+			<div class="card-body">
+				<h5>{{ post.title }}</h5>
+                <p class="card-text">{{ post.description|safe }}</p>
+				<p class="card-text">{{ post.text|safe }}</p>
+				Категория: <a href="{% url 'post_by_category' post.category.slug %}">{{ post.category.title }}</a> / Добавил: {{ post.author.username }} / <small>{{ post.time_create }}</small>
+			</div>
+		</div>
+	</div>
+	{% if post.tags.all %}
+	<div class="card-footer border-0">
+		Теги записи: {% for tag in post.tags.all %} <a href="{% url 'post_by_tags' tag.slug %}">{{ tag }}</a>, {% endfor %}
+	</div>
+	{% endif %}
+                <div class="rating-buttons">
+                    <button class="btn btn-sm btn-primary" data-post="{{ post.id }}" data-value="1">Лайк</button>
+                    <button class="btn btn-sm btn-secondary" data-post="{{ post.id }}" data-value="-1">Дизлайк
+                    </button>
+                    <button class="btn btn-sm btn-secondary rating-sum">{{ post.get_sum_rating }}</button>
+                </div>
+</div>
+<div class="card border-0">
+	<div class="card-body">
+		<h5 class="card-title">
+			Комментарии
+		</h5>
+		{% include 'blog/comments/comments_list.html' %}
+	</div>
+</div>
+        <script src="{% static 'ratings.js' %}"></script>
+{% block script %}{% endblock %}
 {% endblock %}

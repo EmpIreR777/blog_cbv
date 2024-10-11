@@ -1,5 +1,29 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="/">My Django Blog 2.0</a>
-        </div>
+    <div class='d-flex justify-content-end '>
+                {% if request.user.is_authenticated %}
+            <div class="dropdown text-end">
+            <a href="#" class="d-block navbar-brand text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ request.user }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'post_create' %}">Добавить статью</a></li>
+                <li><a class="dropdown-item" href="{% url 'profile_detail' request.user.profile.slug %}">Мой профиль</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                        <form action="{% url 'logout' %}" method="post">{% csrf_token %}
+                            <a href="#" class="dropdown-item" onclick="parentNode.submit();">Log Out</a>
+                        </form>
+                </li>
+            </ul>
+            </div>
+            {% else %}
+                <ul class="nav ">
+                <li><a href="{% url 'register' %}" class="navbar-brand px-2">Регистрация</a></li>
+                <li><a href="{% url 'login' %}" class="navbar-brand px-2">Вход</a></li>
+                </ul>
+            {% endif %}
+    </div>
+</div>
 </nav>
