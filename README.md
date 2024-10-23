@@ -24,27 +24,27 @@
 ### Установка и запуск
 1. Клонируйте репозиторий:
     
-    git@github.com:EmpIreR777/blog_cbv.git
+    ```git@github.com:EmpIreR777/blog_cbv.git```
     
 2. Перейдите в директорию проекта:
     
-    cd blog_cbv
+    ```cd blog_cbv```
     
 3. Установите необходимые зависимости:
     
-    pip install -r requirements.txt
+    ```pip install -r requirements.txt```
     
 4. Примените миграции:
     
-    python manage.py migrate
+    ```python manage.py migrate```
     
 5. Создайте суперпользователя для доступа к административной панели:
     
-    python manage.py createsuperuser
+    ```python manage.py createsuperuser```
     
 6. Запустите сервер:
     
-    python manage.py runserver
+    ```python manage.py runserver```
     
 
 ### Заключение
